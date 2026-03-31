@@ -944,6 +944,7 @@ let currentQ = 1;
 let showingBlockResult = false;
 let saveTimeout = null;
 let isSaving = false;
+let isCompleted = false;
 
 // ══════════════════════════════════════════════
 //  INIT
@@ -1236,6 +1237,8 @@ function triggerAutoSave() {
 }
 
 async function doSave(estado = 'Incompleto', aiAnalysis = '') {
+  // No sobreescribir si ya está completado
+  if (isCompleted && estado === 'Incompleto') return;
   console.log('doSave llamado:', estado, 'análisis chars:', aiAnalysis.length);
   isSaving = true;
 
@@ -1278,6 +1281,8 @@ function setSaveStatus(status) {
 //  FINISH
 // ══════════════════════════════════════════════
 async function finishQuiz() {
+  clearTimeout(saveTimeout); // cancelar cualquier auto-save pendiente
+  isCompleted = true;
   showScreen('results');
   renderResults();
 }
@@ -1457,7 +1462,7 @@ function generateAIAnalysis(dimScores, totalPct, levelLabel) {
 //  RESTART
 // ══════════════════════════════════════════════
 function restartQuiz() {
-  formData = {}; answers = {}; currentQ = 1;
+  formData = {}; answers = {}; currentQ = 1; isCompleted = false;
   ['f-email','f-nombre-enc','f-cargo','f-encuestador','f-anunciante','f-razon','f-ruc']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('resume-banner').classList.remove('show');
