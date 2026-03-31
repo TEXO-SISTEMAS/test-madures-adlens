@@ -728,7 +728,7 @@
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Ig1HKc30t9Is87V6ciKdaSs7Fh5UM1KQgriZEWXUsHfs_rF24KmBurdEX3wxRhkw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCG78rYViIXHqKTI2Th1KLK1erFMkNzxHCocwShhLKpZfVec41AtG8nLmP4U1MxPkq/exec';
 const AI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbwx6LPhQDRFAMi3Y_3yw22MoECj-eYptufMXiBrMAeQOX9s2A21CHTBHXWJScqAEviQ/exec';
 
 const DIMENSIONS = [
@@ -945,6 +945,7 @@ let showingBlockResult = false;
 let saveTimeout = null;
 let isSaving = false;
 let isCompleted = false;
+let saveVersion = 0;
 
 // ══════════════════════════════════════════════
 //  INIT
@@ -1237,15 +1238,10 @@ function triggerAutoSave() {
 }
 
 async function doSave(estado = 'Incompleto', aiAnalysis = '') {
-  // No sobreescribir si ya está completado
   if (isCompleted && estado === 'Incompleto') return;
-  console.log('doSave llamado:', estado, 'análisis chars:', aiAnalysis.length);
-  isSaving = true;
 
-  // Bloquear botón final solo si estamos en la pantalla del quiz
-  const nextBtn = document.getElementById('btn-next');
-  const onLastQ = currentQ === 25 && !showingBlockResult;
-  if (nextBtn && onLastQ && estado !== 'Completado') nextBtn.disabled = true;
+  const myVersion = ++saveVersion;
+  isSaving = true;
 
   try {
     await fetch(APPS_SCRIPT_URL, {
@@ -1254,14 +1250,12 @@ async function doSave(estado = 'Incompleto', aiAnalysis = '') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ formData, answers, estado, aiAnalysis }),
     });
-    setSaveStatus('saved');
+    // Solo actualizar estado si este save sigue siendo el más reciente
+    if (myVersion === saveVersion) setSaveStatus('saved');
   } catch(e) {
-    setSaveStatus('error');
+    if (myVersion === saveVersion) setSaveStatus('error');
   } finally {
-    isSaving = false;
-    if (nextBtn && onLastQ && answers[25] !== undefined && estado !== 'Completado') {
-      nextBtn.disabled = false;
-    }
+    if (myVersion === saveVersion) isSaving = false;
   }
 }
 
