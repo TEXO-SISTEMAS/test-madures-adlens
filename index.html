@@ -1353,33 +1353,42 @@ Datos:
 - Dimensiones: ${dimSummary}
 
 Escribí 3 párrafos cortos:
-1. Una lectura del perfil general (qué dice este resultado sobre la organización)
-2. Las 2 dimensiones más críticas y por qué son prioritarias
-3. Una recomendación concreta y accionable para los próximos 90 días
+1. Una lectura del perfil general
+2. Las 2 dimensiones más críticas y por qué
+3. Una recomendación concreta para los próximos 90 días
 
-Sé específico, evitá lugares comunes. Máximo 180 palabras en total.`;
+Máximo 180 palabras.`;
 
-  try {
-    const res = await fetch(AI_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    const text = data.success ? data.text : '';
+  return new Promise((resolve) => {
+    const callbackName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      if (data.success && data.text) {
+        const text = data.text;
+        document.getElementById('ai-analysis-content').innerHTML =
+          `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
+        doSave('Completado', text);
+      } else {
+        document.getElementById('ai-analysis-content').innerHTML =
+          `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
+      }
+      resolve();
+    };
 
-    if (text) {
+    script.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(script);
       document.getElementById('ai-analysis-content').innerHTML =
-        `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
-      // Guardar análisis IA en el Sheet
-      doSave('Completado', text);
-    } else {
-      throw new Error('Empty response');
-    }
-  } catch(e) {
-    document.getElementById('ai-analysis-content').innerHTML =
-      `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
-  }
+        `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
+      resolve();
+    };
+
+    script.src = AI_PROXY_URL + '?callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
+    document.body.appendChild(script);
+  });
 }
 
 // ══════════════════════════════════════════════
