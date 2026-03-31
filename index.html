@@ -1338,59 +1338,104 @@ function renderResults() {
 
   // AI analysis
   generateAIAnalysis(dimScores, pct, level.label);
-}
 
-async function generateAIAnalysis(dimScores, totalPct, levelLabel) {
-  const dimSummary = DIMENSIONS.map((d, i) => {
-    const p = Math.round((dimScores[i] / d.max) * 100);
-    let nivel = p < 35 ? 'Inicial' : p < 65 ? 'Intermedio' : 'Avanzado';
-    return `${d.name}: ${p}% (${nivel})`;
-  }).join('\n- ');
+function generateAIAnalysis(dimScores, totalPct, levelLabel) {
+  const empresa = formData.nombreAnunciante;
 
-  const prompt = `Sos un consultor senior de marketing estratégico de AdLens. Analizá el nivel de madurez de marketing de la empresa "${formData.nombreAnunciante}" según estos resultados y escribí un diagnóstico en español rioplatense (tuteo), sin markdown, sin asteriscos, sin numeración, solo texto plano en párrafos.
+  // Calcular porcentajes por dimensión
+  const pcts = DIMENSIONS.map((d, i) => Math.round((dimScores[i] / d.max) * 100));
+  const [p1, p2, p3, p4, p5, p6] = pcts;
 
-RESULTADOS:
-- Nivel general: ${levelLabel} (${totalPct}% de madurez)
-- ${dimSummary}
+  // Encontrar las 2 dimensiones más débiles
+  const ranked = DIMENSIONS.map((d, i) => ({ name: d.name, pct: pcts[i], idx: i }))
+    .sort((a, b) => a.pct - b.pct);
+  const debil1 = ranked[0];
+  const debil2 = ranked[1];
+  const fuerte1 = ranked[ranked.length - 1];
 
-Escribí exactamente 3 párrafos separados por salto de línea:
+  // ── PÁRRAFO 1: Diagnóstico general según nivel ──
+  const diagnosticos = {
+    'Empresa Inicial': [
+      `${empresa} está en una etapa donde el marketing todavía opera de forma reactiva. Con un ${totalPct}% de madurez general, las decisiones se toman más por intuición que por datos, y las acciones de marketing responden a urgencias del momento antes que a una estrategia clara. Esto no es un juicio, es un punto de partida: muchas empresas que hoy lideran su categoría arrancaron exactamente desde acá.`,
+      `El diagnóstico de ${empresa} muestra un marketing que todavía está encontrando su lugar dentro de la organización. Un ${totalPct}% de madurez indica que hay más potencial sin explotar que capacidades ya desarrolladas, y eso es precisamente donde está la oportunidad más grande.`
+    ],
+    'En Desarrollo': [
+      `${empresa} tiene las bases pero le falta consistencia. Con un ${totalPct}% de madurez, el marketing ya existe como función pero aún no opera como ventaja competitiva. Hay esfuerzo, hay intención, pero los resultados todavía dependen demasiado de variables que no se controlan ni se miden bien.`,
+      `El perfil de ${empresa} muestra una organización que ya invierte en marketing pero todavía no está cosechando todo lo que podría. El ${totalPct}% de madurez general refleja un equipo que ejecuta bien en algunos frentes pero pierde consistencia cuando se mira el cuadro completo.`
+    ],
+    'Avanzado': [
+      `${empresa} opera con un marketing que tiene solidez en varias áreas, pero el ${totalPct}% de madurez general revela que el techo de crecimiento está justo ahí, en las brechas que quedan. La diferencia entre avanzado y líder no es esfuerzo — es saber exactamente dónde enfocar la energía.`,
+      `Con un ${totalPct}% de madurez, ${empresa} está claramente por encima del promedio del mercado. El desafío ahora no es construir desde cero sino afinar: las organizaciones en este nivel suelen tener fortalezas reales pero también puntos ciegos que frenan el salto al siguiente nivel.`
+    ],
+    'Líder Estratégico': [
+      `${empresa} muestra un perfil de madurez excepcional con ${totalPct}%. El marketing opera como una ventaja competitiva real, con estrategia, datos y ejecución alineados. El trabajo en este nivel es sostener esa ventaja y seguir ampliando la distancia con el mercado.`,
+      `Con ${totalPct}% de madurez, ${empresa} está en el grupo de organizaciones donde el marketing ya no es un costo sino un activo estratégico. La pregunta que vale hacerse ahora es cómo escalar lo que funciona y blindar lo que podría rezagarse.`
+    ]
+  };
 
-Párrafo 1: Diagnóstico general. Qué dice este perfil sobre cómo está operando el marketing en esta empresa hoy. Sé directo y específico con los números.
-
-Párrafo 2: Las 2 dimensiones con menor puntaje. Explicá por qué son un problema concreto para el negocio y qué riesgo generan si no se atienden.
-
-Párrafo 3: Una recomendación accionable y específica para los próximos 90 días. Decí exactamente qué hacer, no generalidades.
-
-Máximo 200 palabras. Sin títulos, sin bullets, sin markdown.`;
-
-  try {
-    const url = AI_PROXY_URL + '?prompt=' + encodeURIComponent(prompt);
-    const res = await fetch(url);
-    const data = await res.json();
-    const text = data.success ? data.text : '';
-
-    if (text) {
-      // Limpiar cualquier markdown residual
-      const clean = text
-        .replace(/#{1,3}\s/g, '')
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/\*(.*?)\*/g, '$1')
-        .replace(/^\s*[-•]\s*/gm, '');
-
-      const paragraphs = clean.split(/\n\n+/).filter(p => p.trim()).map(p =>
-        `<p style="margin-bottom:12px;line-height:1.7;">${p.trim()}</p>`
-      ).join('');
-
-      document.getElementById('ai-analysis-content').innerHTML =
-        `<div class="ai-analysis-text">${paragraphs}</div>`;
-      doSave('Completado', text);
-    } else {
-      throw new Error('Empty response');
+  // ── PÁRRAFO 2: Las 2 dimensiones más débiles ──
+  const consecuencias = {
+    0: { // Estrategia & Marca
+      bajo: `Una estrategia de marca débil (${debil1.pct}%) significa que cada campaña empieza de cero: sin un posicionamiento claro, es difícil que el mercado recuerde a ${empresa} por algo específico. Se gasta energía construyendo relevancia que se pierde apenas para la comunicación.`,
+      medio: `Con Estrategia & Marca en ${debil1.pct}%, ${empresa} tiene definiciones que no siempre se traducen en acción. El riesgo es comunicar de formas distintas según quién ejecuta, diluyendo la identidad de marca justo cuando más se necesita coherencia.`
+    },
+    1: { // Organización & Cultura
+      bajo: `Organización & Cultura en ${debil1.pct}% es una señal de que el marketing no tiene el peso interno que necesita. Las mejores estrategias mueren si el equipo no tiene autonomía, si las decisiones se traban en jerarquías o si otras áreas no entienden el rol del marketing.`,
+      medio: `Un ${debil1.pct}% en Organización & Cultura indica que hay fricción interna que frena la velocidad de ejecución. Marketing puede tener buenas ideas pero si no tiene la estructura ni la cultura para implementarlas rápido, el mercado no lo va a esperar.`
+    },
+    2: { // Capacidades & Tecnología
+      bajo: `Capacidades & Tecnología en ${debil1.pct}% implica que ${empresa} está tomando decisiones de marketing con información incompleta. Sin las herramientas adecuadas, es imposible saber qué funciona, qué no, y dónde está el dinero mal invertido.`,
+      medio: `Con ${debil1.pct}% en Capacidades & Tecnología, hay herramientas que probablemente no se están usando al máximo. Eso se traduce en datos fragmentados y en equipos que duplican esfuerzos porque no tienen visibilidad compartida.`
+    },
+    3: { // Ejecución & Performance
+      bajo: `Ejecución & Performance en ${debil1.pct}% es la brecha más costosa: significa que la inversión en marketing no se está midiendo ni optimizando. Se sabe que algo funciona, pero no exactamente qué, ni cuánto vale.`,
+      medio: `Un ${debil1.pct}% en Ejecución & Performance indica que las campañas se lanzan pero no se iteran lo suficiente. Se deja plata sobre la mesa cada vez que una campaña termina sin haberse optimizado en el camino.`
+    },
+    4: { // Cliente & Datos
+      bajo: `Cliente & Datos en ${debil1.pct}% significa que las decisiones sobre a quién hablarle, qué decirle y cuándo se toman con poca evidencia. En mercados competitivos, quien conoce mejor a su cliente tiene una ventaja que no se puede copiar fácilmente.`,
+      medio: `Con ${debil1.pct}% en Cliente & Datos, ${empresa} tiene información de clientes pero no la está convirtiendo en inteligencia accionable. El gap entre tener datos y usarlos para tomar mejores decisiones es justo donde se pierde competitividad.`
+    },
+    5: { // AdLens Signature
+      bajo: `El bloque AdLens Signature en ${debil1.pct}% muestra que las decisiones todavía se apoyan más en la intuición que en datos combinados con visión estratégica. Eso limita la velocidad y la ambición con la que ${empresa} puede crecer.`,
+      medio: `Con ${debil1.pct}% en el bloque Signature, hay oportunidad de elevar la calidad de las decisiones estratégicas. La diferencia entre crecer de forma sostenida y crecer por inercia está exactamente ahí.`
     }
-  } catch(e) {
-    document.getElementById('ai-analysis-content').innerHTML =
-      `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
-  }
+  };
+
+  // ── PÁRRAFO 3: Cierre que posiciona AdLens ──
+  const cierres = [
+    `Este patrón — fortaleza en ${fuerte1.name} pero brechas en ${debil1.name} y ${debil2.name} — lo vemos seguido en empresas que están en el momento justo de dar un salto. No es un problema de presupuesto ni de talento: es un problema de foco y de método. AdLens trabaja exactamente en ese espacio, ayudando a organizaciones como ${empresa} a convertir su potencial en resultados medibles y sostenibles.`,
+    `Lo interesante de este perfil es que las fortalezas ya están. El camino al siguiente nivel no pasa por empezar de cero sino por activar lo que ya existe de forma más estratégica. Eso es lo que AdLens hace: encontrar los puntos de palanca específicos de cada organización y trabajarlos con precisión.`,
+    `Cada empresa tiene un patrón único de madurez, y el de ${empresa} tiene señales claras de hacia dónde enfocar la energía. Hay un camino concreto desde donde están hoy hasta donde pueden estar — y en AdLens conocemos ese camino porque lo recorrimos con muchas organizaciones similares.`
+  ];
+
+  // Seleccionar variantes según nivel
+  const levelKey = levelLabel;
+  const diagOptions = diagnosticos[levelKey] || diagnosticos['En Desarrollo'];
+  const diag = diagOptions[Math.floor(Math.random() * diagOptions.length)];
+
+  const cons1idx = debil1.idx;
+  const cons1level = debil1.pct < 40 ? 'bajo' : 'medio';
+  const cons1 = consecuencias[cons1idx]?.[cons1level] || '';
+
+  const cons2idx = debil2.idx;
+  const cons2level = debil2.pct < 40 ? 'bajo' : 'medio';
+  const cons2key = cons2level;
+  const cons2text = consecuencias[cons2idx]?.[cons2key] || '';
+
+  const cierre = cierres[Math.floor(Math.random() * cierres.length)];
+
+  const parrafo2 = `${cons1} ${cons2text}`;
+  const fullText = `${diag}\n\n${parrafo2}\n\n${cierre}`;
+
+  // Renderizar
+  const paragraphs = fullText.split('\n\n').filter(p => p.trim()).map(p =>
+    `<p style="margin-bottom:14px;line-height:1.75;">${p.trim()}</p>`
+  ).join('');
+
+  document.getElementById('ai-analysis-content').innerHTML =
+    `<div class="ai-analysis-text">${paragraphs}</div>`;
+
+  doSave('Completado', fullText);
 }
 
 // ══════════════════════════════════════════════
