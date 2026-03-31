@@ -1237,10 +1237,11 @@ function triggerAutoSave() {
 
 async function doSave(estado = 'Incompleto', aiAnalysis = '') {
   isSaving = true;
-  // Block finish button while saving
+
+  // Bloquear botón final solo si estamos en la pantalla del quiz
   const nextBtn = document.getElementById('btn-next');
-  const isLastQ = currentQ === 25;
-  if (nextBtn && isLastQ && !showingBlockResult) nextBtn.disabled = true;
+  const onLastQ = currentQ === 25 && !showingBlockResult;
+  if (nextBtn && onLastQ && estado !== 'Completado') nextBtn.disabled = true;
 
   try {
     await fetch(APPS_SCRIPT_URL, {
@@ -1254,8 +1255,7 @@ async function doSave(estado = 'Incompleto', aiAnalysis = '') {
     setSaveStatus('error');
   } finally {
     isSaving = false;
-    // Re-enable finish button if we're on last question and it's answered
-    if (nextBtn && isLastQ && !showingBlockResult && answers[25] !== undefined) {
+    if (nextBtn && onLastQ && answers[25] !== undefined && estado !== 'Completado') {
       nextBtn.disabled = false;
     }
   }
