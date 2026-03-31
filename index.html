@@ -4,26 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AdLens | Test de Madurez de Marketing</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --purple: #5B1FE0;
-    --purple-dark: #3D0FA8;
-    --purple-light: #7B4FEE;
-    --orange: #FF5C1A;
-    --orange-light: #FF8050;
-    --bg: #0A0612;
-    --bg2: #110920;
-    --surface: #1A1030;
-    --surface2: #231540;
-    --border: rgba(91,31,224,0.25);
-    --text: #F0EBF8;
-    --text-muted: #8B7BA8;
-    --text-dim: #5A4E70;
+    --purple: #F97B0A;
+    --purple-dark: #C75F00;
+    --purple-light: #FFB347;
+    --orange: #F97B0A;
+    --orange-light: #FFB347;
+    --bg: #04082E;
+    --bg2: #070D3D;
+    --surface: #0D1550;
+    --surface2: #121C60;
+    --border: rgba(249,123,10,0.25);
+    --text: #F0F4FF;
+    --text-muted: #8B9FD4;
+    --text-dim: #4A5A8A;
     --success: #22D4A0;
     --white: #ffffff;
     --radius: 16px;
     --radius-sm: 10px;
+    --accent: #F97B0A;
+    --navy: #04082E;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,7 +46,7 @@
     left: -20%;
     width: 70%;
     height: 100%;
-    background: radial-gradient(ellipse, rgba(91,31,224,0.15) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(249,123,10,0.08) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -55,7 +57,7 @@
     right: -10%;
     width: 60%;
     height: 80%;
-    background: radial-gradient(ellipse, rgba(255,92,26,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(13,21,80,0.6) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -71,7 +73,7 @@
     background: var(--bg);
     flex-direction: column; gap: 20px;
   }
-  .loading-logo { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); letter-spacing: -1px; }
+  .loading-logo { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); letter-spacing: -1px; }
   .loading-logo span { color: var(--orange); }
   .loading-bar { width: 200px; height: 3px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
   .loading-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--purple), var(--orange)); border-radius: 99px; animation: loadbar 1.2s ease forwards; }
@@ -86,7 +88,7 @@
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
   }
-  .nav-logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .nav-logo { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
   .nav-logo span { color: var(--orange); }
   .nav-badge {
     font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
@@ -112,7 +114,7 @@
   @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
   .welcome-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: clamp(28px, 5vw, 52px);
     font-weight: 800;
     line-height: 1.1;
@@ -120,7 +122,7 @@
     margin-bottom: 20px;
   }
   .welcome-title .highlight {
-    background: linear-gradient(135deg, var(--purple-light), var(--orange));
+    background: linear-gradient(135deg, #FFB347, #F97B0A);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
 
@@ -166,7 +168,7 @@
     border-radius: var(--radius); padding: 32px; margin-bottom: 32px;
   }
   .form-section-title {
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);
     margin-bottom: 20px;
   }
@@ -183,7 +185,7 @@
   }
   .form-input:focus {
     border-color: var(--purple-light);
-    box-shadow: 0 0 0 3px rgba(91,31,224,0.15);
+    box-shadow: 0 0 0 3px rgba(249,123,10,0.15);
   }
   .form-input::placeholder { color: var(--text-dim); }
   .form-input.error { border-color: #FF5070; }
@@ -191,7 +193,7 @@
   /* Resume banner */
   #resume-banner {
     display: none;
-    background: linear-gradient(135deg, rgba(34,212,160,0.1), rgba(91,31,224,0.1));
+    background: linear-gradient(135deg, rgba(34,212,160,0.1), rgba(249,123,10,0.1));
     border: 1px solid rgba(34,212,160,0.3);
     border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 24px;
     font-size: 14px; color: var(--success);
@@ -208,25 +210,25 @@
     text-decoration: none;
   }
   .btn-primary {
-    background: linear-gradient(135deg, var(--purple), var(--purple-light));
+    background: linear-gradient(135deg, #F97B0A, #FFB347);
     color: white;
-    box-shadow: 0 4px 20px rgba(91,31,224,0.4);
+    box-shadow: 0 4px 20px rgba(249,123,10,0.4);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(91,31,224,0.5);
+    box-shadow: 0 8px 30px rgba(249,123,10,0.5);
   }
   .btn-secondary {
     background: var(--surface); border: 1px solid var(--border);
     color: var(--text-muted);
   }
-  .btn-secondary:hover { border-color: var(--purple-light); color: var(--text); }
+  .btn-secondary:hover { border-color: #F97B0A; color: var(--text); }
   .btn-orange {
-    background: linear-gradient(135deg, var(--orange), var(--orange-light));
+    background: linear-gradient(135deg, #F97B0A, #FFB347);
     color: white;
-    box-shadow: 0 4px 20px rgba(255,92,26,0.3);
+    box-shadow: 0 4px 20px rgba(249,123,10,0.3);
   }
-  .btn-orange:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,92,26,0.4); }
+  .btn-orange:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(249,123,10,0.4); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
   .btn-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
 
@@ -247,7 +249,7 @@
     margin-bottom: 16px;
   }
   .progress-dim-label {
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.08em;
   }
   .progress-dim-label .dim-name { color: var(--orange); }
@@ -304,7 +306,7 @@
     color: var(--text-dim); margin-bottom: 12px;
   }
   .question-text {
-    font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 600;
     line-height: 1.4; margin-bottom: 24px;
   }
 
@@ -316,7 +318,7 @@
   .scale-btn {
     flex: 1; height: 44px; border-radius: var(--radius-sm);
     background: var(--bg2); border: 2px solid transparent;
-    color: var(--text-muted); font-family: 'Syne', sans-serif;
+    color: var(--text-muted); font-family: 'Montserrat', sans-serif;
     font-size: 14px; font-weight: 700; cursor: pointer;
     transition: all 0.15s;
   }
@@ -338,10 +340,10 @@
     background: var(--bg2); border: 2px solid transparent;
     cursor: pointer; transition: all 0.15s;
   }
-  .option:hover { border-color: rgba(91,31,224,0.4); background: rgba(91,31,224,0.05); }
+  .option:hover { border-color: rgba(249,123,10,0.4); background: rgba(249,123,10,0.05); }
   .option.selected {
     border-color: var(--purple-light);
-    background: rgba(91,31,224,0.12);
+    background: rgba(249,123,10,0.12);
   }
   .option-radio {
     width: 20px; height: 20px; border-radius: 50%;
@@ -383,7 +385,7 @@
     font-size: 32px;
   }
   .block-complete-title {
-    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 700;
     margin-bottom: 8px;
   }
   .block-complete-dim { color: var(--orange); }
@@ -421,17 +423,17 @@
   .results-badge {
     display: inline-block;
     padding: 8px 20px; border-radius: 99px;
-    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em;
     margin-bottom: 20px;
   }
   .level-inicial { background: rgba(255,80,112,0.15); color: #FF5070; border: 1px solid rgba(255,80,112,0.3); }
   .level-desarrollo { background: rgba(255,180,0,0.12); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
-  .level-avanzado { background: rgba(91,31,224,0.15); color: var(--purple-light); border: 1px solid rgba(91,31,224,0.3); }
+  .level-avanzado { background: rgba(249,123,10,0.15); color: #FFB347; border: 1px solid rgba(249,123,10,0.3); }
   .level-lider { background: rgba(34,212,160,0.12); color: var(--success); border: 1px solid rgba(34,212,160,0.3); }
 
   .results-title {
-    font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 44px);
+    font-family: 'Montserrat', sans-serif; font-size: clamp(28px, 4vw, 44px);
     font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 12px;
   }
   .results-subtitle { font-size: 16px; color: var(--text-muted); }
@@ -453,7 +455,7 @@
     transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);
   }
   .score-ring-text { text-align: center; }
-  .score-pct { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; }
+  .score-pct { font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 800; }
   .score-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
 
   /* Dimension breakdown */
@@ -467,14 +469,14 @@
   }
   .dim-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .dim-card-name { font-size: 13px; font-weight: 500; }
-  .dim-card-score { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--orange); }
+  .dim-card-score { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; color: var(--orange); }
   .dim-card-bar { height: 5px; background: var(--bg2); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
   .dim-card-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--orange)); transition: width 1s 0.5s cubic-bezier(0.4,0,0.2,1); }
   .dim-card-level { font-size: 11px; color: var(--text-dim); }
 
   /* AI analysis */
   .ai-analysis {
-    background: linear-gradient(135deg, rgba(91,31,224,0.08), rgba(255,92,26,0.05));
+    background: linear-gradient(135deg, rgba(249,123,10,0.08), rgba(255,92,26,0.05));
     border: 1px solid var(--border); border-radius: var(--radius);
     padding: 28px; margin-bottom: 28px;
   }
@@ -693,8 +695,8 @@
         <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#5B1FE0"/>
-              <stop offset="100%" stop-color="#FF5C1A"/>
+              <stop offset="0%" stop-color="#F97B0A"/>
+              <stop offset="100%" stop-color="#FFB347"/>
             </linearGradient>
           </defs>
           <circle class="score-ring-bg" cx="80" cy="80" r="70"/>
