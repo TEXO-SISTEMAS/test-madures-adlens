@@ -728,8 +728,8 @@
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby1ltnBt3tDi9m-2cA3iawHSbPLezPfdYFoYdceqa7i2BxzDshQ-AC_Td86V13qJIvv/exec';
-const AI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGZE1Im81ZEA8IAnxKLM7TOxGg-odYOpULwWZ8ZMdWsSNPAn85HC-pV6fy988H39o/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Ig1HKc30t9Is87V6ciKdaSs7Fh5UM1KQgriZEWXUsHfs_rF24KmBurdEX3wxRhkw/exec';
+const AI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbzGlCX9NjpOl_i5WAKRug_f3Yxs_XayRF6v66IlJtbGx63Cl6JHBU1ht6qUUUCDqxI4/exec';
 
 const DIMENSIONS = [
   { name: 'Estrategia & Marca',       questions: [1,2,3,4],        icon: '🎯', max: 12 },
@@ -1353,42 +1353,29 @@ Datos:
 - Dimensiones: ${dimSummary}
 
 Escribí 3 párrafos cortos:
-1. Una lectura del perfil general
-2. Las 2 dimensiones más críticas y por qué
-3. Una recomendación concreta para los próximos 90 días
+1. Una lectura del perfil general (qué dice este resultado sobre la organización)
+2. Las 2 dimensiones más críticas y por qué son prioritarias
+3. Una recomendación concreta y accionable para los próximos 90 días
 
-Máximo 180 palabras.`;
+Sé específico, evitá lugares comunes. Máximo 180 palabras en total.`;
 
-  return new Promise((resolve) => {
-    const callbackName = 'cb_' + Date.now();
-    const script = document.createElement('script');
-    
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      if (data.success && data.text) {
-        const text = data.text;
-        document.getElementById('ai-analysis-content').innerHTML =
-          `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
-        doSave('Completado', text);
-      } else {
-        document.getElementById('ai-analysis-content').innerHTML =
-          `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
-      }
-      resolve();
-    };
+  try {
+    const url = AI_PROXY_URL + '?prompt=' + encodeURIComponent(prompt);
+    const res = await fetch(url);
+    const data = await res.json();
+    const text = data.success ? data.text : '';
 
-    script.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(script);
+    if (text) {
       document.getElementById('ai-analysis-content').innerHTML =
-        `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
-      resolve();
-    };
-
-    script.src = AI_PROXY_URL + '?callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
-    document.body.appendChild(script);
-  });
+        `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
+      doSave('Completado', text);
+    } else {
+      throw new Error('Empty response');
+    }
+  } catch(e) {
+    document.getElementById('ai-analysis-content').innerHTML =
+      `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
+  }
 }
 
 // ══════════════════════════════════════════════
