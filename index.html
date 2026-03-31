@@ -729,6 +729,7 @@
 //  CONFIG
 // ══════════════════════════════════════════════
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyNDXgN9nQOoqV8dQcTggaoKgdOjrTl1YwxLuVuUiXtn46XImooNjeXqoDduhM9ds/exec';
+const AI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGZE1Im81ZEA8IAnxKLM7TOxGg-odYOpULwWZ8ZMdWsSNPAn85HC-pV6fy988H39o/exec';
 
 const DIMENSIONS = [
   { name: 'Estrategia & Marca',       questions: [1,2,3,4],        icon: '🎯', max: 12 },
@@ -1202,6 +1203,9 @@ function showBlockResult(dimIdx) {
   else if (pct < 65) { levelLabel = 'Nivel Intermedio'; levelInsight = insight.mid; }
   else { levelLabel = 'Nivel Avanzado'; levelInsight = insight.high; }
 
+  // Auto-save al terminar el bloque
+  doSave('Incompleto');
+
   document.getElementById('quiz-content').innerHTML = `
     <div class="block-complete">
       <div class="block-complete-icon">${dim.icon}</div>
@@ -1230,13 +1234,13 @@ function triggerAutoSave() {
   saveTimeout = setTimeout(doSave, 1500);
 }
 
-async function doSave(estado = 'Incompleto') {
+async function doSave(estado = 'Incompleto', aiAnalysis = '') {
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ formData, answers, estado }),
+      body: JSON.stringify({ formData, answers, estado, aiAnalysis }),
     });
     setSaveStatus('saved');
   } catch(e) {
@@ -1356,19 +1360,22 @@ Escribí 3 párrafos cortos:
 Sé específico, evitá lugares comunes. Máximo 180 palabras en total.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(AI_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ prompt })
     });
     const data = await res.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
-    document.getElementById('ai-analysis-content').innerHTML =
-      `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
+    const text = data.success ? data.text : '';
+
+    if (text) {
+      document.getElementById('ai-analysis-content').innerHTML =
+        `<div class="ai-analysis-text">${text.replace(/\n\n/g,'</p><p style="margin-top:12px;">').replace(/\n/g,'<br>')}</div>`;
+      // Guardar análisis IA en el Sheet
+      doSave('Completado', text);
+    } else {
+      throw new Error('Empty response');
+    }
   } catch(e) {
     document.getElementById('ai-analysis-content').innerHTML =
       `<div class="ai-analysis-text" style="color:var(--text-dim)">Análisis no disponible en este momento.</div>`;
